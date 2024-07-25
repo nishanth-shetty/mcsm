@@ -351,7 +351,7 @@ class WAERunner():
             image_grid = make_grid(samples, 10)
 
         save_image(
-            image_grid, f'./assets/generated/{self.config.data.dataset}_{self.config.training.algo}_{self.config.training.method}_image_grid.png')
+            image_grid, f'./assets/generated/{self.config.data.dataset}_{self.config.training.algo}_{self.config.training.method}_{self.config.model.z_dim}_image_grid.png')
 
     def test_fid(self):
         #assert self.config.data.dataset == 'CELEBA'
