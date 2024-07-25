@@ -5,7 +5,7 @@ from datetime import datetime
 import math
 
 # Read the file
-run_name = 'mcsm_mnist_central'
+run_name = 'mcsm_mnist_backward'
 path = f'./run/logs/{run_name}/'
 filename = path + 'stdout.txt'
 with open(filename, 'r') as f:
