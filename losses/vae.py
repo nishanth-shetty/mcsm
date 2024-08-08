@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 import torch.autograd as autograd
-from losses.mcsm import mcsm_loss
+from losses.mcsm import mcsm_loss, mcsm_backward_loss, mcsm_forward_loss
 from losses.sliced_sm import sliced_score_matching, sliced_score_estimation, sliced_score_estimation_vr
 import functools
 import numpy as np
@@ -107,6 +107,80 @@ def elbo_mcsm(imp_encoder, decoder, score, score_opt, X, type='gaussian', traini
 
     return loss, ssm_loss, recon
 
+def elbo_mcsm_forward(imp_encoder, decoder, score, score_opt, X, type='gaussian', training=True, n_energy_opt=1, n_particles=1):
+    dup_X = X.unsqueeze(0).expand(n_particles, *X.shape).contiguous().view(-1, *X.shape[1:])
+    z = imp_encoder(X)
+    ssm_loss, *_ = mcsm_forward_loss(functools.partial(score, dup_X), z, n_particles=n_particles)
+    if training:
+        score_opt.zero_grad()
+        ssm_loss.backward()
+        score_opt.step()
+        for i in range(n_energy_opt - 1):
+            z = imp_encoder(X)
+            ssm_loss, *_ = mcsm_loss(functools.partial(score, dup_X), z, n_particles=n_particles)
+            score_opt.zero_grad()
+            ssm_loss.backward()
+            score_opt.step()
+
+    z = imp_encoder(X)
+    if type is 'gaussian':
+        mean_x, logstd_x = decoder(z)
+        recon = (X - mean_x) ** 2 / (2. * (2 * logstd_x).exp()) + np.log(2. * np.pi) / 2. + logstd_x
+        recon = recon.sum(dim=(1, 2, 3))
+    elif type is 'bernoulli':
+        x_logits = decoder(z)
+        recon = F.binary_cross_entropy_with_logits(input=x_logits, target=X, reduction='sum')
+        recon /= x_logits.shape[0]
+
+    nlogpz = z ** 2 / 2. + np.log(2. * np.pi) / 2.
+    nlogpz = nlogpz.sum(dim=-1)
+
+    scores = score(X, z)
+    entropy_loss = (scores.detach() * z).sum(dim=-1)
+
+    loss = recon + nlogpz + entropy_loss
+
+    loss = loss.mean()
+
+    return loss, ssm_loss, recon
+
+
+def elbo_mcsm_backward(imp_encoder, decoder, score, score_opt, X, type='gaussian', training=True, n_energy_opt=1, n_particles=1):
+    dup_X = X.unsqueeze(0).expand(n_particles, *X.shape).contiguous().view(-1, *X.shape[1:])
+    z = imp_encoder(X)
+    ssm_loss, *_ = mcsm_backward_loss(functools.partial(score, dup_X), z, n_particles=n_particles)
+    if training:
+        score_opt.zero_grad()
+        ssm_loss.backward()
+        score_opt.step()
+        for i in range(n_energy_opt - 1):
+            z = imp_encoder(X)
+            ssm_loss, *_ = mcsm_loss(functools.partial(score, dup_X), z, n_particles=n_particles)
+            score_opt.zero_grad()
+            ssm_loss.backward()
+            score_opt.step()
+
+    z = imp_encoder(X)
+    if type is 'gaussian':
+        mean_x, logstd_x = decoder(z)
+        recon = (X - mean_x) ** 2 / (2. * (2 * logstd_x).exp()) + np.log(2. * np.pi) / 2. + logstd_x
+        recon = recon.sum(dim=(1, 2, 3))
+    elif type is 'bernoulli':
+        x_logits = decoder(z)
+        recon = F.binary_cross_entropy_with_logits(input=x_logits, target=X, reduction='sum')
+        recon /= x_logits.shape[0]
+
+    nlogpz = z ** 2 / 2. + np.log(2. * np.pi) / 2.
+    nlogpz = nlogpz.sum(dim=-1)
+
+    scores = score(X, z)
+    entropy_loss = (scores.detach() * z).sum(dim=-1)
+
+    loss = recon + nlogpz + entropy_loss
+
+    loss = loss.mean()
+
+    return loss, ssm_loss, recon
 
 
 def elbo_kernel(imp_encoder, decoder, estimator, X, type='gaussian', n_particles=100):

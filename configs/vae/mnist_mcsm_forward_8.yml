@@ -3,7 +3,7 @@ training:
   n_epochs: 6000
   n_iters: 100000
   algo: "mcsm"
-  method: "central"
+  method: "forward"
 
 data:
   dataset: "MNIST"

@@ -10,7 +10,7 @@ from torchvision.utils import make_grid, save_image
 from torchvision.datasets import MNIST, CIFAR10, ImageFolder
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, Subset
-from losses.vae import elbo, elbo_ssm, iwae, elbo_kernel, elbo_mcsm
+from losses.vae import elbo, elbo_ssm, iwae, elbo_kernel, elbo_mcsm, elbo_mcsm_backward, elbo_mcsm_forward
 from models.vae import Encoder, Decoder, ImplicitEncoder, MLPDecoder, MLPEncoder, \
     MLPImplicitEncoder, MLPScore, Score
 import itertools
@@ -187,8 +187,16 @@ class VAERunner():
                     opt_ae.step()
                 elif self.config.training.algo == 'mcsm':
                     imp_encoder.train()
-                    loss, mcsm_loss, *_ = elbo_mcsm(imp_encoder, decoder, score, opt_score, X, recon_type,
+                    if self.config.training.method == "central":
+                        loss, mcsm_loss, *_ = elbo_mcsm(imp_encoder, decoder, score, opt_score, X, recon_type,
                                                   training=True, n_particles=self.config.model.n_particles)
+                    elif self.config.training.method == "forward":
+                        loss, mcsm_loss, *_ = elbo_mcsm_forward(imp_encoder, decoder, score, opt_score, X, recon_type,
+                                                  training=True, n_particles=self.config.model.n_particles)
+                    elif self.config.training.method == "backward":
+                        loss, mcsm_loss, *_ = elbo_mcsm_backward(imp_encoder, decoder, score, opt_score, X, recon_type,
+                                                  training=True, n_particles=self.config.model.n_particles)
+                    
                     opt_ae.zero_grad()
                     loss.backward()
                     opt_ae.step()
@@ -234,9 +242,19 @@ class VAERunner():
                         tb_logger.add_histogram('z_X', z, global_step=step)
                     elif self.config.training.algo == 'mcsm':
                         imp_encoder.eval()
-                        test_loss, * \
-                            _ = elbo_mcsm(imp_encoder, decoder, score,
-                                         None, test_X, recon_type, training=False)
+                        if self.config.training.method == "central":
+                            test_loss, * \
+                                _ = elbo_mcsm(imp_encoder, decoder, score,
+                                            None, test_X, recon_type, training=False)
+                        elif self.config.training.method == "forward":
+                            test_loss, * \
+                                _ = elbo_mcsm_forward(imp_encoder, decoder, score,
+                                            None, test_X, recon_type, training=False)
+                        elif self.config.training.method == "backward":
+                            test_loss, * \
+                                _ = elbo_mcsm_backward(imp_encoder, decoder, score,
+                                            None, test_X, recon_type, training=False)
+                        
                         logging.info("loss: {}, mcsm_loss: {}, test_loss: {}".format(loss.item(), mcsm_loss.item(),
                                                                                     test_loss.item()))
                         z = imp_encoder(test_X)
