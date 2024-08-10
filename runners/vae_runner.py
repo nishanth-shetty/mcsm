@@ -380,7 +380,7 @@ class VAERunner():
         save_image(image_grid, f'./assets/generated/{self.config.data.dataset}_{self.config.training.algo}_{self.config.training.method}_{self.config.model.z_dim}_image_grid.png')
 
     def test_fid(self):
-        assert self.config.data.dataset == 'CELEBA'
+        # assert self.config.data.dataset == 'CELEBA'
         transform = transforms.Compose([
             transforms.Resize(self.config.data.image_size),
             transforms.ToTensor()

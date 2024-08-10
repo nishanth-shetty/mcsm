@@ -459,7 +459,7 @@ class WAERunner():
                                            os.path.join(self.args.log, 'samples'), 50, True, 2048)
                 logging.info("Statistics generated.")
             else:
-                for iter in range(10, 11):
+                for iter in range(1, 11):
                     states = torch.load(os.path.join(self.args.log, 'checkpoint_{}0k.pth'.format(iter)),
                                         map_location=self.config.device)
                     decoder = Decoder(self.config).to(self.config.device)

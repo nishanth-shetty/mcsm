@@ -131,8 +131,8 @@ def main():
             runner.train()
         else:
             runner.test()
-            # runner.test_fid()
-            # runner.test_ais()
+            #runner.test_fid()
+            runner.test_ais()
     except:
         logging.error(traceback.format_exc())
 
