@@ -39,16 +39,16 @@ def wae_ssm(encoder, decoder, score, score_opt, X, training=True, n_energy_opt=1
     return loss, ssm_loss, recon
 
 
-def wae_mcsm(encoder, decoder, score, score_opt, X, training=True, n_energy_opt=1, n_particles=1, lam=10):
+def wae_mcsm(encoder, decoder, score, score_opt, X, training=True, n_energy_opt=1, n_particles=1, lam=10, eps=1e-3):
     z = encoder(X)
-    mcsm_losses, *_ = mcsm_loss(score, z, n_particles=n_particles)
+    mcsm_losses, *_ = mcsm_loss(score, z, n_particles=n_particles, eps=eps)
     if training:
         score_opt.zero_grad()
         mcsm_losses.backward()
         score_opt.step()
         for i in range(n_energy_opt - 1):
             z = encoder(X)
-            mcsm_losses, *_ = mcsm_loss(score, z, n_particles=n_particles)
+            mcsm_losses, *_ = mcsm_loss(score, z, n_particles=n_particles, eps=eps)
             score_opt.zero_grad()
             mcsm_losses.backward()
             score_opt.step()
@@ -71,16 +71,16 @@ def wae_mcsm(encoder, decoder, score, score_opt, X, training=True, n_energy_opt=
     return loss, mcsm_losses, recon
 
 
-def wae_mcsm_forward(encoder, decoder, score, score_opt, X, training=True, n_energy_opt=1, n_particles=1, lam=10):
+def wae_mcsm_forward(encoder, decoder, score, score_opt, X, training=True, n_energy_opt=1, n_particles=1, lam=10, eps=1e-3):
     z = encoder(X)
-    mcsm_loss, *_ = mcsm_forward_loss(score, z, n_particles=n_particles)
+    mcsm_loss, *_ = mcsm_forward_loss(score, z, n_particles=n_particles, eps=eps)
     if training:
         score_opt.zero_grad()
         mcsm_loss.backward()
         score_opt.step()
         for i in range(n_energy_opt - 1):
             z = encoder(X)
-            mcsm_loss, *_ = mcsm_loss_forward(score, z, n_particles=n_particles)
+            mcsm_loss, *_ = mcsm_forward_loss(score, z, n_particles=n_particles, eps=eps)
             score_opt.zero_grad()
             mcsm_loss.backward()
             score_opt.step()
@@ -103,16 +103,16 @@ def wae_mcsm_forward(encoder, decoder, score, score_opt, X, training=True, n_ene
     return loss, mcsm_loss, recon
 
 
-def wae_mcsm_backward(encoder, decoder, score, score_opt, X, training=True, n_energy_opt=1, n_particles=1, lam=10):
+def wae_mcsm_backward(encoder, decoder, score, score_opt, X, training=True, n_energy_opt=1, n_particles=1, lam=10, eps=1e-3):
     z = encoder(X)
-    mcsm_loss, *_ = mcsm_backward_loss(score, z, n_particles=n_particles)
+    mcsm_loss, *_ = mcsm_backward_loss(score, z, n_particles=n_particles, eps=eps)
     if training:
         score_opt.zero_grad()
         mcsm_loss.backward()
         score_opt.step()
         for i in range(n_energy_opt - 1):
             z = encoder(X)
-            mcsm_loss, *_ = mcsm_loss_backward(score, z, n_particles=n_particles)
+            mcsm_loss, *_ = mcsm_backward_loss(score, z, eps=eps, n_particles=n_particles)
             score_opt.zero_grad()
             mcsm_loss.backward()
             score_opt.step()

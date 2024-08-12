@@ -70,17 +70,17 @@ def elbo_ssm(imp_encoder, decoder, score, score_opt, X, type='gaussian', trainin
 
     return loss, ssm_loss, recon
 
-def elbo_mcsm(imp_encoder, decoder, score, score_opt, X, type='gaussian', training=True, n_energy_opt=1, n_particles=1):
+def elbo_mcsm(imp_encoder, decoder, score, score_opt, X, type='gaussian', training=True, n_energy_opt=1, n_particles=1, eps=1e-3):
     dup_X = X.unsqueeze(0).expand(n_particles, *X.shape).contiguous().view(-1, *X.shape[1:])
     z = imp_encoder(X)
-    ssm_loss, *_ = mcsm_loss(functools.partial(score, dup_X), z, n_particles=n_particles)
+    ssm_loss, *_ = mcsm_loss(functools.partial(score, dup_X), z, n_particles=n_particles, eps=eps)
     if training:
         score_opt.zero_grad()
         ssm_loss.backward()
         score_opt.step()
         for i in range(n_energy_opt - 1):
             z = imp_encoder(X)
-            ssm_loss, *_ = mcsm_loss(functools.partial(score, dup_X), z, n_particles=n_particles)
+            ssm_loss, *_ = mcsm_loss(functools.partial(score, dup_X), z, n_particles=n_particles, eps=eps)
             score_opt.zero_grad()
             ssm_loss.backward()
             score_opt.step()
@@ -107,17 +107,17 @@ def elbo_mcsm(imp_encoder, decoder, score, score_opt, X, type='gaussian', traini
 
     return loss, ssm_loss, recon
 
-def elbo_mcsm_forward(imp_encoder, decoder, score, score_opt, X, type='gaussian', training=True, n_energy_opt=1, n_particles=1):
+def elbo_mcsm_forward(imp_encoder, decoder, score, score_opt, X, type='gaussian', training=True, n_energy_opt=1, n_particles=1, eps=1e-3):
     dup_X = X.unsqueeze(0).expand(n_particles, *X.shape).contiguous().view(-1, *X.shape[1:])
     z = imp_encoder(X)
-    ssm_loss, *_ = mcsm_forward_loss(functools.partial(score, dup_X), z, n_particles=n_particles)
+    ssm_loss, *_ = mcsm_forward_loss(functools.partial(score, dup_X), z, n_particles=n_particles, eps=eps)
     if training:
         score_opt.zero_grad()
         ssm_loss.backward()
         score_opt.step()
         for i in range(n_energy_opt - 1):
             z = imp_encoder(X)
-            ssm_loss, *_ = mcsm_loss(functools.partial(score, dup_X), z, n_particles=n_particles)
+            ssm_loss, *_ = mcsm_forward_loss(functools.partial(score, dup_X), z, n_particles=n_particles, eps=eps)
             score_opt.zero_grad()
             ssm_loss.backward()
             score_opt.step()
@@ -145,17 +145,17 @@ def elbo_mcsm_forward(imp_encoder, decoder, score, score_opt, X, type='gaussian'
     return loss, ssm_loss, recon
 
 
-def elbo_mcsm_backward(imp_encoder, decoder, score, score_opt, X, type='gaussian', training=True, n_energy_opt=1, n_particles=1):
+def elbo_mcsm_backward(imp_encoder, decoder, score, score_opt, X, type='gaussian', training=True, n_energy_opt=1, n_particles=1, eps=1e-3):
     dup_X = X.unsqueeze(0).expand(n_particles, *X.shape).contiguous().view(-1, *X.shape[1:])
     z = imp_encoder(X)
-    ssm_loss, *_ = mcsm_backward_loss(functools.partial(score, dup_X), z, n_particles=n_particles)
+    ssm_loss, *_ = mcsm_backward_loss(functools.partial(score, dup_X), z, n_particles=n_particles, eps=eps)
     if training:
         score_opt.zero_grad()
         ssm_loss.backward()
         score_opt.step()
         for i in range(n_energy_opt - 1):
             z = imp_encoder(X)
-            ssm_loss, *_ = mcsm_loss(functools.partial(score, dup_X), z, n_particles=n_particles)
+            ssm_loss, *_ = mcsm_backward_loss(functools.partial(score, dup_X), z, n_particles=n_particles, eps=eps)
             score_opt.zero_grad()
             ssm_loss.backward()
             score_opt.step()

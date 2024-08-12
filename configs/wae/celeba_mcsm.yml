@@ -4,7 +4,8 @@ training:
   n_iters: 100000
   algo: "mcsm"
   method: "central"
-
+  eps: 1e-3
+  
 data:
   dataset: "CELEBA"
   image_size: 64

@@ -171,17 +171,20 @@ class WAERunner():
                         loss, mcsm_loss, *_ = wae_mcsm(encoder, decoder, score, opt_score, X,
                                                        training=True,
                                                        n_particles=self.config.model.n_particles,
-                                                       lam=self.config.model.lam)
+                                                       lam=self.config.model.lam, 
+                                                       eps=self.config.training.eps)
                     elif self.config.training.method == 'forward':
                         loss, mcsm_loss, *_ = wae_mcsm_forward(encoder, decoder, score, opt_score, X,
                                                                training=True,
                                                                n_particles=self.config.model.n_particles,
-                                                               lam=self.config.model.lam)
+                                                               lam=self.config.model.lam, 
+                                                               eps=self.config.training.eps)
                     elif self.config.training.method == 'backward':
                         loss, mcsm_loss, *_ = wae_mcsm_backward(encoder, decoder, score, opt_score, X,
                                                                 training=True,
                                                                 n_particles=self.config.model.n_particles,
-                                                                lam=self.config.model.lam)
+                                                                lam=self.config.model.lam, 
+                                                                eps=self.config.training.eps)
                     opt_ae.zero_grad()
                     loss.backward()
                     opt_ae.step()
@@ -226,15 +229,18 @@ class WAERunner():
                         if self.config.training.method == 'central':
                             test_loss, *_ = wae_mcsm(encoder, decoder, score, None, test_X, training=False,
                                                      n_particles=self.config.model.n_particles,
-                                                     lam=self.config.model.lam)
+                                                     lam=self.config.model.lam,
+                                                     eps=self.config.training.eps)
                         elif self.config.training.method == 'forward':
                             test_loss, *_ = wae_mcsm_forward(encoder, decoder, score, None, test_X, training=False,
                                                              n_particles=self.config.model.n_particles,
-                                                             lam=self.config.model.lam)
+                                                             lam=self.config.model.lam,
+                                                             eps=self.config.training.eps)
                         elif self.config.training.method == 'backward':
                             test_loss, *_ = wae_mcsm_backward(encoder, decoder, score, None, test_X, training=False,
                                                               n_particles=self.config.model.n_particles,
-                                                              lam=self.config.model.lam)
+                                                              lam=self.config.model.lam,
+                                                              eps=self.config.training.eps)
                         logging.info("loss: {}, mcsm_loss: {}, test_loss: {}".format(loss.item(), mcsm_loss.item(),
                                                                                      test_loss.item()))
                         z = encoder(test_X)
@@ -351,7 +357,7 @@ class WAERunner():
             image_grid = make_grid(samples, 10)
 
         save_image(
-            image_grid, f'./assets/generated/{self.config.data.dataset}_{self.config.training.algo}_{self.config.training.method}_{self.config.model.z_dim}_image_grid_wae.png')
+            image_grid, f'./assets/generated/{self.config.data.dataset}_{self.config.training.algo}_{self.config.training.method}_{self.config.model.z_dim}_image_grid_wae .png')
 
     def test_fid(self):
         #assert self.config.data.dataset == 'CELEBA'

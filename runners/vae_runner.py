@@ -189,13 +189,16 @@ class VAERunner():
                     imp_encoder.train()
                     if self.config.training.method == "central":
                         loss, mcsm_loss, *_ = elbo_mcsm(imp_encoder, decoder, score, opt_score, X, recon_type,
-                                                  training=True, n_particles=self.config.model.n_particles)
+                                                  training=True, n_particles=self.config.model.n_particles,
+                                                  eps=self.config.training.eps)
                     elif self.config.training.method == "forward":
                         loss, mcsm_loss, *_ = elbo_mcsm_forward(imp_encoder, decoder, score, opt_score, X, recon_type,
-                                                  training=True, n_particles=self.config.model.n_particles)
+                                                  training=True, n_particles=self.config.model.n_particles,
+                                                  eps=self.config.training.eps)
                     elif self.config.training.method == "backward":
                         loss, mcsm_loss, *_ = elbo_mcsm_backward(imp_encoder, decoder, score, opt_score, X, recon_type,
-                                                  training=True, n_particles=self.config.model.n_particles)
+                                                  training=True, n_particles=self.config.model.n_particles,
+                                                  eps=self.config.training.eps)
                     
                     opt_ae.zero_grad()
                     loss.backward()
@@ -245,15 +248,18 @@ class VAERunner():
                         if self.config.training.method == "central":
                             test_loss, * \
                                 _ = elbo_mcsm(imp_encoder, decoder, score,
-                                            None, test_X, recon_type, training=False)
+                                            None, test_X, recon_type, training=False,
+                                            eps=self.config.training.eps)
                         elif self.config.training.method == "forward":
                             test_loss, * \
                                 _ = elbo_mcsm_forward(imp_encoder, decoder, score,
-                                            None, test_X, recon_type, training=False)
+                                            None, test_X, recon_type, training=False,
+                                            eps=self.config.training.eps)
                         elif self.config.training.method == "backward":
                             test_loss, * \
                                 _ = elbo_mcsm_backward(imp_encoder, decoder, score,
-                                            None, test_X, recon_type, training=False)
+                                            None, test_X, recon_type, training=False,
+                                            eps=self.config.training.eps)
                         
                         logging.info("loss: {}, mcsm_loss: {}, test_loss: {}".format(loss.item(), mcsm_loss.item(),
                                                                                     test_loss.item()))
