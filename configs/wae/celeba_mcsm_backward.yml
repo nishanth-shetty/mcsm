@@ -4,7 +4,7 @@ training:
   n_iters: 100000
   algo: "mcsm"
   method: "backward"
-  eps: 1e-3
+  eps: 0.000001
 
 data:
   dataset: "CELEBA"

@@ -477,7 +477,7 @@ class VAERunner():
 
                 all_samples = []
                 logging.info("Generating samples")
-                for i in range(100):
+                for i in range(5000):
                     with torch.no_grad():
                         z = torch.randn(
                             100, self.config.model.z_dim, device=self.config.device)
@@ -530,7 +530,7 @@ class VAERunner():
 
                     all_samples = []
                     logging.info("Generating samples")
-                    for i in range(100):
+                    for i in range(5000):
                         with torch.no_grad():
                             z = torch.randn(
                                 100, self.config.model.z_dim, device=self.config.device)
