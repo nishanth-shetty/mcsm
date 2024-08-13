@@ -477,12 +477,12 @@ class VAERunner():
 
                 all_samples = []
                 logging.info("Generating samples")
-                for i in range(100):
+                for i in range(200):
                     with torch.no_grad():
                         z = torch.randn(
-                            100, self.config.model.z_dim, device=self.config.device)
+                            200, self.config.model.z_dim, device=self.config.device)
                         samples, _ = decoder(z)
-                        samples = samples.view(100, self.config.data.channels, self.config.data.image_size,
+                        samples = samples.view(200, self.config.data.channels, self.config.data.image_size,
                                                self.config.data.image_size)
                         all_samples.extend(samples / 2. + 0.5)
 
@@ -530,12 +530,12 @@ class VAERunner():
 
                     all_samples = []
                     logging.info("Generating samples")
-                    for i in range(100):
+                    for i in range(200):
                         with torch.no_grad():
                             z = torch.randn(
-                                100, self.config.model.z_dim, device=self.config.device)
+                                200, self.config.model.z_dim, device=self.config.device)
                             samples, _ = decoder(z)
-                            samples = samples.view(100, self.config.data.channels, self.config.data.image_size,
+                            samples = samples.view(200, self.config.data.channels, self.config.data.image_size,
                                                    self.config.data.image_size)
                             all_samples.extend(samples / 2. + 0.5)
 
