@@ -444,12 +444,12 @@ class WAERunner():
 
                 all_samples = []
                 logging.info("Generating samples")
-                for i in range(5000):
+                for i in range(d100):
                     with torch.no_grad():
                         z = torch.randn(
-                            5000, self.config.model.z_dim, device=self.config.device)
+                            100, self.config.model.z_dim, device=self.config.device)
                         samples = decoder(z)
-                        samples = samples.view(5000, self.config.data.channels, self.config.data.image_size,
+                        samples = samples.view(100, self.config.data.channels, self.config.data.image_size,
                                                self.config.data.image_size)
                         all_samples.extend(samples / 2. + 0.5)
 
@@ -490,12 +490,12 @@ class WAERunner():
 
                     all_samples = []
                     logging.info("Generating samples")
-                    for i in range(5000):
+                    for i in range(100):
                         with torch.no_grad():
                             z = torch.randn(
-                                5000, self.config.model.z_dim, device=self.config.device)
+                                100, self.config.model.z_dim, device=self.config.device)
                             samples = decoder(z)
-                            samples = samples.view(5000, self.config.data.channels, self.config.data.image_size,
+                            samples = samples.view(100, self.config.data.channels, self.config.data.image_size,
                                                    self.config.data.image_size)
                             all_samples.extend(samples / 2. + 0.5)
 
