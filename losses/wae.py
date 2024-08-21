@@ -1,5 +1,5 @@
 import torch
-from losses.mcsm import mcsm_loss, mcsm_forward_loss, mcsm_backward_loss
+from losses.mcsm import mcsm_loss, mcsm_backward_loss, mcsm_forward_loss, mcsm_loss_optimized, mcsm_forward_loss_optimized, mcsm_backward_loss_optimized
 from losses.sliced_sm import sliced_score_matching, sliced_score_estimation, sliced_score_estimation_vr
 import numpy as np
 
@@ -41,14 +41,14 @@ def wae_ssm(encoder, decoder, score, score_opt, X, training=True, n_energy_opt=1
 
 def wae_mcsm(encoder, decoder, score, score_opt, X, training=True, n_energy_opt=1, n_particles=1, lam=10, eps=1e-3):
     z = encoder(X)
-    mcsm_losses, *_ = mcsm_loss(score, z, n_particles=n_particles, eps=eps)
+    mcsm_losses, *_ = mcsm_loss_optimized(score, z, n_particles=n_particles, eps=eps)
     if training:
         score_opt.zero_grad()
         mcsm_losses.backward()
         score_opt.step()
         for i in range(n_energy_opt - 1):
             z = encoder(X)
-            mcsm_losses, *_ = mcsm_loss(score, z, n_particles=n_particles, eps=eps)
+            mcsm_losses, *_ = mcsm_loss_optimized(score, z, n_particles=n_particles, eps=eps)
             score_opt.zero_grad()
             mcsm_losses.backward()
             score_opt.step()
@@ -73,14 +73,14 @@ def wae_mcsm(encoder, decoder, score, score_opt, X, training=True, n_energy_opt=
 
 def wae_mcsm_forward(encoder, decoder, score, score_opt, X, training=True, n_energy_opt=1, n_particles=1, lam=10, eps=1e-3):
     z = encoder(X)
-    mcsm_loss, *_ = mcsm_forward_loss(score, z, n_particles=n_particles, eps=eps)
+    mcsm_loss, *_ = mcsm_forward_loss_optimized(score, z, n_particles=n_particles, eps=eps)
     if training:
         score_opt.zero_grad()
         mcsm_loss.backward()
         score_opt.step()
         for i in range(n_energy_opt - 1):
             z = encoder(X)
-            mcsm_loss, *_ = mcsm_forward_loss(score, z, n_particles=n_particles, eps=eps)
+            mcsm_loss, *_ = mcsm_forward_loss_optimized(score, z, n_particles=n_particles, eps=eps)
             score_opt.zero_grad()
             mcsm_loss.backward()
             score_opt.step()
@@ -105,14 +105,14 @@ def wae_mcsm_forward(encoder, decoder, score, score_opt, X, training=True, n_ene
 
 def wae_mcsm_backward(encoder, decoder, score, score_opt, X, training=True, n_energy_opt=1, n_particles=1, lam=10, eps=1e-3):
     z = encoder(X)
-    mcsm_loss, *_ = mcsm_backward_loss(score, z, n_particles=n_particles, eps=eps)
+    mcsm_loss, *_ = mcsm_backward_loss_optimized(score, z, n_particles=n_particles, eps=eps)
     if training:
         score_opt.zero_grad()
         mcsm_loss.backward()
         score_opt.step()
         for i in range(n_energy_opt - 1):
             z = encoder(X)
-            mcsm_loss, *_ = mcsm_backward_loss(score, z, eps=eps, n_particles=n_particles)
+            mcsm_loss, *_ = mcsm_backward_loss_optimized(score, z, eps=eps, n_particles=n_particles)
             score_opt.zero_grad()
             mcsm_loss.backward()
             score_opt.step()

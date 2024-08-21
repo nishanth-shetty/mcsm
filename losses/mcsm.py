@@ -75,7 +75,7 @@ def mcsm_backward_loss(scorenet, samples, n_particles=1, m=20, eps=1e-3):
 
     return loss.mean(), loss1.mean(), loss2.mean()
 
-def mcsm_loss_optimized(scorenet, samples, n_particles=1, m=10, eps=1e-3):
+def mcsm_loss_optimized(scorenet, samples, n_particles=1, m=20, eps=1e-3):
     N = samples.shape[0]
     scores = scorenet(samples)
 
@@ -88,6 +88,60 @@ def mcsm_loss_optimized(scorenet, samples, n_particles=1, m=10, eps=1e-3):
     samples_eps_b = samples.unsqueeze(0).expand(m, N, *samples.shape[1:])
     forw_back_samples = torch.cat(
         [samples_eps_b + eps * b, samples_eps_b - eps * b], dim=0)
+    forw_back_scores = scorenet(forw_back_samples)
+
+    # Reshape and compute sums
+    b_reshaped = b.view(m * N, -1)
+    forw_back_scores_reshaped = forw_back_scores.view(2 * m * N, -1)
+    sums = torch.einsum('bi,bi->b', b_reshaped,
+                        forw_back_scores_reshaped[:m * N] - forw_back_scores_reshaped[m * N:])
+
+    second_term = (1 / eps) * torch.mean(sums)
+    loss = 1 / 2. * (torch.mean(first_term) + second_term)
+
+    return loss, torch.mean(first_term), second_term
+
+
+def mcsm_forward_loss_optimized(scorenet, samples, n_particles=1, m=20, eps=1e-3):
+    N = samples.shape[0]
+    scores = scorenet(samples)
+
+    first_term = torch.norm(scores, p=2) ** 2
+
+    # Generate all m random vectors at once
+    b = torch.randn(m, N, *samples.shape[1:]).to(samples.device)
+
+    # Compute forward and backward scores at once
+    samples_eps_b = samples.unsqueeze(0).expand(m, N, *samples.shape[1:])
+    forw_back_samples = torch.cat(
+        [samples_eps_b + eps * b, samples_eps_b], dim=0)
+    forw_back_scores = scorenet(forw_back_samples)
+
+    # Reshape and compute sums
+    b_reshaped = b.view(m * N, -1)
+    forw_back_scores_reshaped = forw_back_scores.view(2 * m * N, -1)
+    sums = torch.einsum('bi,bi->b', b_reshaped,
+                        forw_back_scores_reshaped[:m * N] - forw_back_scores_reshaped[m * N:])
+
+    second_term = (1 / eps) * torch.mean(sums)
+    loss = 1 / 2. * (torch.mean(first_term) + second_term)
+
+    return loss, torch.mean(first_term), second_term
+
+
+def mcsm_backward_loss_optimized(scorenet, samples, n_particles=1, m=20, eps=1e-3):
+    N = samples.shape[0]
+    scores = scorenet(samples)
+
+    first_term = torch.norm(scores, p=2) ** 2
+
+    # Generate all m random vectors at once
+    b = torch.randn(m, N, *samples.shape[1:]).to(samples.device)
+
+    # Compute forward and backward scores at once
+    samples_eps_b = samples.unsqueeze(0).expand(m, N, *samples.shape[1:])
+    forw_back_samples = torch.cat(
+        [samples_eps_b, samples_eps_b - eps * b], dim=0)
     forw_back_scores = scorenet(forw_back_samples)
 
     # Reshape and compute sums
