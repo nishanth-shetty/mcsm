@@ -38,26 +38,3 @@ For example, if you want to train an implicit VAE of latent size 8 on MNIST with
 ```bash
 python main.py --runner VAERunner --config vae/mnist_ssm_8.yml
 ```
-
-
-
-## References
-
-If you find the idea or code useful for your research, please consider citing our paper:
-
-```
-@inproceedings{song2019sliced,
-  author    = {Yang Song and
-               Sahaj Garg and
-               Jiaxin Shi and
-               Stefano Ermon},
-  title     = {Sliced Score Matching: {A} Scalable Approach to Density and Score
-               Estimation},
-  booktitle = {Proceedings of the Thirty-Fifth Conference on Uncertainty in Artificial
-               Intelligence, {UAI} 2019, Tel Aviv, Israel, July 22-25, 2019},
-  pages     = {204},
-  year      = {2019},
-  url       = {http://auai.org/uai2019/proceedings/papers/204.pdf},
-}
-```
-
