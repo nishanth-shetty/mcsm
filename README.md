@@ -1,6 +1,6 @@
-# Sliced Score Matching: A Scalable Approach to Density and Score Estimation
+# Monte Carlo Score Matching
 
-This repo contains a PyTorch implementation for the paper [Sliced Score Matching: A Scalable Approach to Density and Score Estimation](https://arxiv.org/abs/1905.07088), UAI 2019. Sliced score matching is a scalable variant of score matching that can be used to train unnormalized statistical models or estimating the score (derivatives of the log-density function) of data.
+This repo contains a PyTorch implementation for the ICASSP 2024 submissiion: Monte Carlo Score-Matching. 
 
 
 
