@@ -25,9 +25,9 @@ def mcsm_loss_old(scorenet, samples, n_particles=1, m=20, eps=1e-3):
     return loss, torch.mean(first_term), second_term
 
 
-def mcsm_forward_loss(scorenet, samples, n_particles=1, m=20, eps=1e-3, type=0):
+def mcsm_forward_loss(scorenet, samples, n_particles=1, m=20, eps=1e-3, var_type=0):
     """
-    Type: int that specifies the choice of distribution for the random vector b
+    var_type: int that specifies the choice of distribution for the random vector b
     0: Normal distribution
     1: Rademacher distribution
     2: Unit Sphere distribution
@@ -41,14 +41,14 @@ def mcsm_forward_loss(scorenet, samples, n_particles=1, m=20, eps=1e-3, type=0):
     sums = 0.0
 
     for i in range(m):
-        if type == 0:
+        if var_type == 0:
             b = torch.randn_like(samples)
-        elif type == 1:
+        elif var_type == 1:
             bernoulli_samples = torch.bernoulli(torch.full(samples.shape, 0.5))
             # Transform Bernoulli samples to Rademacher values (-1 or 1)
-            b = 2 * bernoulli_samples - 1
+            b = (2 * bernoulli_samples - 1).to(samples.device)
         else:
-            exit("Invalid type for the distribution of b")
+            exit("Invalid var_type for the distribution of b")
         forw = scorenet(samples + eps * b)
         back = scorenet(samples)
         sums += torch.einsum('bi,bi->b', (b.view(N, -1),
@@ -64,9 +64,9 @@ def mcsm_forward_loss(scorenet, samples, n_particles=1, m=20, eps=1e-3, type=0):
     return loss.mean(), loss1.mean(), loss2.mean()
 
 
-def mcsm_backward_loss(scorenet, samples, n_particles=1, m=20, eps=1e-3, type=0):
+def mcsm_backward_loss(scorenet, samples, n_particles=1, m=20, eps=1e-3, var_type=0):
     """
-    Type: int that specifies the choice of distribution for the random vector b
+    var_type: int that specifies the choice of distribution for the random vector b
     0: Normal distribution
     1: Rademacher distribution
     2: Unit Sphere distribution
@@ -80,14 +80,14 @@ def mcsm_backward_loss(scorenet, samples, n_particles=1, m=20, eps=1e-3, type=0)
     sums = 0.0
 
     for i in range(m):
-        if type == 0:
+        if var_type == 0:
             b = torch.randn_like(samples)
-        elif type == 1:
+        elif var_type == 1:
             bernoulli_samples = torch.bernoulli(torch.full(samples.shape, 0.5))
             # Transform Bernoulli samples to Rademacher values (-1 or 1)
-            b = 2 * bernoulli_samples - 1
+            b = (2 * bernoulli_samples - 1).to(samples.device)
         else:
-            exit("Invalid type for the distribution of b")
+            exit("Invalid var_type for the distribution of b")
         forw = scorenet(samples)
         back = scorenet(samples - eps * b)
         sums += torch.einsum('bi,bi->b', (b.view(N, -1),
@@ -103,9 +103,9 @@ def mcsm_backward_loss(scorenet, samples, n_particles=1, m=20, eps=1e-3, type=0)
     return loss.mean(), loss1.mean(), loss2.mean()
 
 
-def mcsm_loss_optimized(scorenet, samples, n_particles=1, m=20, eps=1e-3, type=0):
+def mcsm_loss_optimized(scorenet, samples, n_particles=1, m=20, eps=1e-3, var_type=0):
     """
-    Type: int that specifies the choice of distribution for the random vector b
+    var_type: int that specifies the choice of distribution for the random vector b
     0: Normal distribution
     1: Rademacher distribution
     2: Unit Sphere distribution
@@ -117,15 +117,15 @@ def mcsm_loss_optimized(scorenet, samples, n_particles=1, m=20, eps=1e-3, type=0
     loss1 = torch.sum(scores * scores, dim=tuple(range(1, scores.dim()))) / 2.0
 
     # Generate all m random vectors at once
-    if type == 0:
+    if var_type == 0:
         b = torch.randn(m, N, *samples.shape[1:]).to(samples.device)
-    elif type == 1:
+    elif var_type == 1:
         list_indices = [m, N, *samples.shape[1:]]
         bernoulli_samples = torch.bernoulli(torch.full(list_indices, 0.5))
         # Transform Bernoulli samples to Rademacher values (-1 or 1)
         b = (2 * bernoulli_samples - 1).to(samples.device)
     else:
-        exit("Invalid type for the distribution of b")
+        exit("Invalid var_type for the distribution of b")
     # Compute forward and backward scores at once
     samples_eps_b = samples.unsqueeze(0).expand(m, N, *samples.shape[1:])
     forw_samples = samples_eps_b + eps * b
@@ -156,9 +156,9 @@ def mcsm_loss_optimized(scorenet, samples, n_particles=1, m=20, eps=1e-3, type=0
     return loss.mean(), loss1.mean(), loss2.mean()
 
 
-def mcsm_forward_loss_optimized(scorenet, samples, n_particles=1, m=20, eps=1e-3, type=0):
+def mcsm_forward_loss_optimized(scorenet, samples, n_particles=1, m=20, eps=1e-3, var_type=0):
     """
-    Type: int that specifies the choice of distribution for the random vector b
+    var_type: int that specifies the choice of distribution for the random vector b
     0: Normal distribution
     1: Rademacher distribution
     2: Unit Sphere distribution
@@ -170,15 +170,15 @@ def mcsm_forward_loss_optimized(scorenet, samples, n_particles=1, m=20, eps=1e-3
     loss1 = torch.sum(scores * scores, dim=tuple(range(1, scores.dim()))) / 2.0
 
     # Generate all m random vectors at once
-    if type == 0:
+    if var_type == 0:
         b = torch.randn(m, N, *samples.shape[1:]).to(samples.device)
-    elif type == 1:
+    elif var_type == 1:
         list_indices = [m, N, *samples.shape[1:]]
         bernoulli_samples = torch.bernoulli(torch.full(list_indices, 0.5))
         # Transform Bernoulli samples to Rademacher values (-1 or 1)
         b = (2 * bernoulli_samples - 1).to(samples.device)
     else:
-        exit("Invalid type for the distribution of b")
+        exit("Invalid var_type for the distribution of b")
 
     # Compute forward and backward scores at once
     samples_eps_b = samples.unsqueeze(0).expand(m, N, *samples.shape[1:])
@@ -211,9 +211,9 @@ def mcsm_forward_loss_optimized(scorenet, samples, n_particles=1, m=20, eps=1e-3
 
 
 
-def mcsm_backward_loss_optimized(scorenet, samples, n_particles=1, m=20, eps=1e-3, type=0):
+def mcsm_backward_loss_optimized(scorenet, samples, n_particles=1, m=20, eps=1e-3, var_type=0):
     """
-    Type: int that specifies the choice of distribution for the random vector b
+    var_type: int that specifies the choice of distribution for the random vector b
     0: Normal distribution
     1: Rademacher distribution
     2: Unit Sphere distribution
@@ -225,15 +225,15 @@ def mcsm_backward_loss_optimized(scorenet, samples, n_particles=1, m=20, eps=1e-
     loss1 = torch.sum(scores * scores, dim=tuple(range(1, scores.dim()))) / 2.0
 
     # Generate all m random vectors at once
-    if type == 0:
+    if var_type == 0:
         b = torch.randn(m, N, *samples.shape[1:]).to(samples.device)
-    elif type == 1:
+    elif var_type == 1:
         list_indices = [m, N, *samples.shape[1:]]
         bernoulli_samples = torch.bernoulli(torch.full(list_indices, 0.5))
         # Transform Bernoulli samples to Rademacher values (-1 or 1)
         b = (2 * bernoulli_samples - 1).to(samples.device)
     else:
-        exit("Invalid type for the distribution of b")
+        exit("Invalid var_type for the distribution of b")
 
     # Compute forward and backward scores at once
     samples_eps_b = samples.unsqueeze(0).expand(m, N, *samples.shape[1:])
@@ -266,9 +266,9 @@ def mcsm_backward_loss_optimized(scorenet, samples, n_particles=1, m=20, eps=1e-
 
 
 
-def mcsm_loss(scorenet, samples, n_particles=1, m=20, eps=1e-3, type=0):
+def mcsm_loss(scorenet, samples, n_particles=1, m=20, eps=1e-3, var_type=0):
     """
-    Type: int that specifies the choice of distribution for the random vector b
+    var_type: int that specifies the choice of distribution for the random vector b
     0: Normal distribution
     1: Rademacher distribution
     2: Unit Sphere distribution
@@ -285,14 +285,14 @@ def mcsm_loss(scorenet, samples, n_particles=1, m=20, eps=1e-3, type=0):
     # bernoulli_dist = Bernoulli(probs=probs)
 
     for i in range(m):
-        if type == 0:
+        if var_type == 0:
             b = torch.randn_like(samples)
-        elif type == 1:
+        elif var_type == 1:
             bernoulli_samples = torch.bernoulli(torch.full(samples.shape, 0.5))
             # Transform Bernoulli samples to Rademacher values (-1 or 1)
-            b = 2 * bernoulli_samples - 1
+            b = (2 * bernoulli_samples - 1).to(samples.device)
         else:
-            exit("Invalid type for the distribution of b")  
+            exit("Invalid var_type for the distribution of b")  
         forw = scorenet(samples + eps * b)
         back = scorenet(samples - eps * b)
         sums += torch.einsum('bi,bi->b', (b.view(N, -1),
@@ -322,7 +322,7 @@ model = NN()
 outs = model(inps)
 
 start_time = time.perf_counter()  # or time.time()
-a1, b1, c1 = mcsm_loss(model, outs)
+a1, b1, c1 = mcsm_loss(model, outs, var_type=1)
 end_time = time.perf_counter()  # or time.time()
 
 elapsed_time = end_time - start_time
@@ -330,21 +330,21 @@ print(f"Time taken by original loss: {elapsed_time} seconds")
 
 
 start_time = time.perf_counter()  # or time.time()
-a2, b2, c2 = mcsm_loss_optimized(model, outs)
+a2, b2, c2 = mcsm_loss_optimized(model, outs, var_type=1)
 end_time = time.perf_counter()  # or time.time()
 
 elapsed_time = end_time - start_time
 print(f"Time taken by optimized loss (C): {elapsed_time} seconds")
 
 start_time = time.perf_counter()  # or time.time()
-a3, b3, c3 = mcsm_forward_loss_optimized(model, outs)
+a3, b3, c3 = mcsm_forward_loss_optimized(model, outs, var_type=1)
 end_time = time.perf_counter()  # or time.time()
 
 elapsed_time = end_time - start_time
 print(f"Time taken by optimized loss (F): {elapsed_time} seconds")
 
 start_time = time.perf_counter()  # or time.time()
-a4, b4, c4 = mcsm_backward_loss_optimized(model, outs)
+a4, b4, c4 = mcsm_backward_loss_optimized(model, outs, var_type=1)
 end_time = time.perf_counter()  # or time.time()
 
 elapsed_time = end_time - start_time

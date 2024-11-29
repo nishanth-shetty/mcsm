@@ -5,7 +5,7 @@ training:
   algo: "mcsm"
   method: "central"
   eps: 0.000001
-  type: 0
+  var_type: 1
 
 data:
   dataset: "CELEBA"

@@ -173,21 +173,21 @@ class WAERunner():
                                                        n_particles=self.config.model.n_particles,
                                                        lam=self.config.model.lam, 
                                                        eps=self.config.training.eps,
-                                                       type=self.config.training.type)
+                                                       var_type=self.config.training.var_type)
                     elif self.config.training.method == 'forward':
                         loss, mcsm_loss, *_ = wae_mcsm_forward(encoder, decoder, score, opt_score, X,
                                                                training=True,
                                                                n_particles=self.config.model.n_particles,
                                                                lam=self.config.model.lam, 
                                                                eps=self.config.training.eps, 
-                                                               type=self.config.training.type)
+                                                               var_type=self.config.training.var_type)
                     elif self.config.training.method == 'backward':
                         loss, mcsm_loss, *_ = wae_mcsm_backward(encoder, decoder, score, opt_score, X,
                                                                 training=True,
                                                                 n_particles=self.config.model.n_particles,
                                                                 lam=self.config.model.lam, 
                                                                 eps=self.config.training.eps,
-                                                                type=self.config.training.type)
+                                                                var_type=self.config.training.var_type)
                     opt_ae.zero_grad()
                     loss.backward()
                     opt_ae.step()
@@ -234,19 +234,19 @@ class WAERunner():
                                                      n_particles=self.config.model.n_particles,
                                                      lam=self.config.model.lam,
                                                      eps=self.config.training.eps,
-                                                     type=self.config.training.type)
+                                                     var_type=self.config.training.var_type)
                         elif self.config.training.method == 'forward':
                             test_loss, *_ = wae_mcsm_forward(encoder, decoder, score, None, test_X, training=False,
                                                              n_particles=self.config.model.n_particles,
                                                              lam=self.config.model.lam,
                                                              eps=self.config.training.eps,
-                                                             type=self.config.training.type)
+                                                             var_type=self.config.training.var_type)
                         elif self.config.training.method == 'backward':
                             test_loss, *_ = wae_mcsm_backward(encoder, decoder, score, None, test_X, training=False,
                                                               n_particles=self.config.model.n_particles,
                                                               lam=self.config.model.lam,
                                                               eps=self.config.training.eps,
-                                                              type=self.config.training.type)
+                                                              var_type=self.config.training.var_type)
                         logging.info("loss: {}, mcsm_loss: {}, test_loss: {}".format(loss.item(), mcsm_loss.item(),
                                                                                      test_loss.item()))
                         z = encoder(test_X)
