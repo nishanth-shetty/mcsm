@@ -4,6 +4,8 @@ training:
   n_iters: 100000
   algo: "mcsm"
   method: "forward"
+  eps: 0.0000001
+  type: 0
 
 data:
   dataset: "MNIST"

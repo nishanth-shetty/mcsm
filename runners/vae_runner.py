@@ -190,15 +190,15 @@ class VAERunner():
                     if self.config.training.method == "central":
                         loss, mcsm_loss, *_ = elbo_mcsm(imp_encoder, decoder, score, opt_score, X, recon_type,
                                                   training=True, n_particles=self.config.model.n_particles,
-                                                  eps=self.config.training.eps)
+                                                  eps=self.config.training.eps, type=self.config.type)
                     elif self.config.training.method == "forward":
                         loss, mcsm_loss, *_ = elbo_mcsm_forward(imp_encoder, decoder, score, opt_score, X, recon_type,
                                                   training=True, n_particles=self.config.model.n_particles,
-                                                  eps=self.config.training.eps)
+                                                  eps=self.config.training.eps, type=self.config.type)
                     elif self.config.training.method == "backward":
                         loss, mcsm_loss, *_ = elbo_mcsm_backward(imp_encoder, decoder, score, opt_score, X, recon_type,
                                                   training=True, n_particles=self.config.model.n_particles,
-                                                  eps=self.config.training.eps)
+                                                  eps=self.config.training.eps, type=self.config.type)
                     
                     opt_ae.zero_grad()
                     loss.backward()
@@ -249,17 +249,17 @@ class VAERunner():
                             test_loss, * \
                                 _ = elbo_mcsm(imp_encoder, decoder, score,
                                             None, test_X, recon_type, training=False,
-                                            eps=self.config.training.eps)
+                                            eps=self.config.training.eps, type=self.config.type)
                         elif self.config.training.method == "forward":
                             test_loss, * \
                                 _ = elbo_mcsm_forward(imp_encoder, decoder, score,
                                             None, test_X, recon_type, training=False,
-                                            eps=self.config.training.eps)
+                                            eps=self.config.training.eps, type=self.config.type)
                         elif self.config.training.method == "backward":
                             test_loss, * \
                                 _ = elbo_mcsm_backward(imp_encoder, decoder, score,
                                             None, test_X, recon_type, training=False,
-                                            eps=self.config.training.eps)
+                                            eps=self.config.training.eps, type=self.config.type)
                         
                         logging.info("loss: {}, mcsm_loss: {}, test_loss: {}".format(loss.item(), mcsm_loss.item(),
                                                                                     test_loss.item()))
@@ -383,7 +383,7 @@ class VAERunner():
                                    self.config.data.image_size)
             image_grid = make_grid(samples, 10)
 
-        save_image(image_grid, f'./assets/generated/{self.config.data.dataset}_{self.config.training.algo}_{self.config.training.method}_{self.config.model.z_dim}_image_grid_vae.png')
+        save_image(image_grid, f'./assets/generated/{self.config.data.dataset}_{self.config.training.algo}_{self.config.training.method}_dim_{self.config.model.z_dim}_image_grid_vae.png')
 
     def test_fid(self):
         # assert self.config.data.dataset == 'CELEBA'

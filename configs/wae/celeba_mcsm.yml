@@ -4,7 +4,8 @@ training:
   n_iters: 100000
   algo: "mcsm"
   method: "central"
-  eps: 0.001
+  eps: 0.000001
+  type: 0
 
 data:
   dataset: "CELEBA"

@@ -5,6 +5,7 @@ training:
   algo: "mcsm"
   method: "backward"
   eps: 0.001
+  type: 0
 
 data:
   dataset: "CELEBA"

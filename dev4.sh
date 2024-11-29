@@ -1,0 +1,2 @@
+python main.py --runner WAERunner --config wae/celeba_mcsm_backward.yml --doc celeba_mcsm_backward_new_wae_eps_1e-3 --device 6
+#python main.py --runner WAERunner --config wae/celeba_mcsm_backward.yml --doc celeba_mcsm_backward_new_wae_eps_1e-3 --device 6 --test
