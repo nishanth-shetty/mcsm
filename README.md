@@ -1,6 +1,6 @@
 # Monte Carlo Score Matching
 
-This repo contains a PyTorch implementation for the ICASSP 2024 submissiion: Monte Carlo Score-Matching. 
+This repo contains a PyTorch implementation for the ICASSP 2025 submission: Monte Carlo Score-Matching. 
 
 
 
